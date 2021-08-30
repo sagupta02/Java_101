@@ -1,7 +1,9 @@
 package src;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class SocketClientHandlerSend extends Thread {
     private String path;
@@ -16,14 +18,20 @@ public class SocketClientHandlerSend extends Thread {
     }
 
     public void run() {
-        while(true) {
+        while(!runn1.shutdown) {
         try {
-            // Connect to the server
+            // This will keep waiting until a key is pressed
             while (runn1.run == false) {
                 Thread.sleep(1111);
-                System.out.println("Waiting for instructions!!!");
-                
-            }   
+                System.out.println("...");
+                if(runn1.shutdown == true) {
+                    break;
+                }    
+            }
+            if(runn1.shutdown == true) {
+                break;
+            }
+            // The below code will execute on any key press from user   
             System.out.println("Got a trigger.."); 
             Socket s = new Socket(server, 80);
             runn1.s = s;
@@ -34,10 +42,15 @@ public class SocketClientHandlerSend extends Thread {
             out.println();
             runn1.run = false;   
             } 
-        catch (Exception e) {
+        catch (InterruptedException e) {
+            System.out.println("Sending Thread is closed");
+          } catch (UnknownHostException e) {
             e.printStackTrace();
-          }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        }
+        System.out.println("Gracefully closing sending thread");
     }
-    
+   
 }
